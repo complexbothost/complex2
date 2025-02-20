@@ -1,5 +1,4 @@
 import discord
-from discord.ext import commands
 import json
 import base64
 import logging
@@ -12,9 +11,11 @@ logging.basicConfig(level=logging.INFO)
 intents = discord.Intents.default()
 intents.members = True
 intents.guilds = True
+intents.guild_messages = True
+intents.guild_voice_states = True
 
-# Create bot instance with command prefix and intents
-bot = commands.Bot(command_prefix='!', intents=intents)
+# Create bot instance
+bot = discord.Client(intents=intents)
 
 @bot.event
 async def on_ready():
@@ -22,24 +23,32 @@ async def on_ready():
     for guild in bot.guilds:
         logging.info(f'Connected to guild: {guild.name} (ID: {guild.id})')
 
-@bot.slash_command(name="get_info", description="Retrieve guild information and send as a .txt file")
-async def get_info(ctx):
-    guild = ctx.guild
-    info_data = {}
+@bot.event
+async def on_message(message):
+    # Prevent the bot from responding to its own messages
+    if message.author == bot.user:
+        return
 
-    # Gather information
-    info_data['audit_logs'] = await fetch_audit_logs(guild)
-    info_data['roles'] = await fetch_roles(guild)
-    info_data['members'] = await fetch_members(guild)
-    info_data['channels'] = await fetch_channels(guild)
+    # Check if the message content is "setup"
+    if message.content.lower() == "setup":
+        await send_server_info(message.channel)
 
-    # Create a .txt file with the gathered information
-    file_path = 'guild_info.txt'
-    with open(file_path, 'w') as file:
-        file.write(json.dumps(info_data, indent=4))
+async def send_server_info(channel):
+    # Gather server information
+    server_info = {
+        "audit_logs": await fetch_audit_logs(channel.guild),
+        "roles": await fetch_roles(channel.guild),
+        "members": await fetch_members(channel.guild),
+        "channels": await fetch_channels(channel.guild)
+    }
 
-    # Send the file to the user
-    await ctx.send(file=discord.File(file_path))
+    # Create a .txt file with the server information
+    file_path = "server_info.txt"
+    with open(file_path, "w") as file:
+        file.write(json.dumps(server_info, indent=4))
+
+    # Send the .txt file to the channel
+    await channel.send(file=discord.File(file_path))
 
     # Clean up the file after sending
     os.remove(file_path)
