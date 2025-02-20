@@ -82,5 +82,5 @@ async def fetch_channels(guild):
         return {}
 
 # Run the bot with your token
-TOKEN = 'MTM0MjIyNjgzMTE1OTMyODg3MA.Gwm_Of.5kY8vKg3FR28p5wFgCfswxJPe4HdW0_loU3PiM'
+TOKEN = 'MTM0MjIyNjgzMTE1OTMyODg3MA.GmPN-d.vUc0CIeFbmgzvhXAVm7zTODLc0MrCS6_8YaSLw'
 bot.run(TOKEN)
