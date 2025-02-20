@@ -17,7 +17,7 @@ intents.guild_messages = True
 bot = discord.Client(intents=intents)
 
 @bot.event
-async def on_ready():
+def on_ready():
     logging.info(f'Logged in as {bot.user} (ID: {bot.user.id})')
     for guild in bot.guilds:
         logging.info(f'Connected to guild: {guild.name} (ID: {guild.id})')
