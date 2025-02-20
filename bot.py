@@ -12,7 +12,6 @@ intents = discord.Intents.default()
 intents.members = True
 intents.guilds = True
 intents.guild_messages = True
-intents.guild_voice_states = True
 
 # Create bot instance
 bot = discord.Client(intents=intents)
@@ -78,8 +77,6 @@ async def fetch_members(guild):
 async def fetch_channels(guild):
     try:
         channels = [{"name": channel.name, "id": channel.id, "type": str(channel.type)} for channel in guild.channels]
-        voice_channels = [{"name": vc.name, "id": vc.id} for vc in guild.voice_channels]
-        return {"channels": channels, "voice_channels": voice_channels}
     except Exception as e:
         logging.error(f'Error fetching channels: {e}')
         return {}
