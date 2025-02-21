@@ -2,6 +2,7 @@ import discord
 import json
 import base64
 import os
+from datetime import datetime
 
 # Define the bot client
 intents = discord.Intents.default()
@@ -32,7 +33,14 @@ async def gather_data(guild):
     for member in guild.members:
         data["members"].append({
             "user_id": encode_user_id(str(member.id)),
-            "name": member.name
+            "name": member.name,
+            "joined_at": member.joined_at.isoformat(),
+            "profile_picture": str(member.avatar_url),
+            "banner": str(member.banner_url) if member.banner else None,
+            "badges": [str(badge) for badge in member.public_flags],
+            "message_count": sum(1 for _ in await member.history(limit=None).flatten()),
+            "bio": member.bio if hasattr(member, 'bio') else None,
+            "discord_joined_at": member.created_at.isoformat()
         })
 
     # Gather channels
@@ -71,6 +79,11 @@ async def gather_data(guild):
                 data["messages"].append({
                     "message_id": str(message.id),
                     "content": message.content,
+                    "author": {
+                        "user_id": encode_user_id(str(message.author.id)),
+                        "username": message.author.name,
+                        "sent_at": message.created_at.isoformat()
+                    },
                     "channel_id": str(channel.id)
                 })
         except Exception as e:
