@@ -5,11 +5,7 @@ import os
 from datetime import datetime
 
 # Define the bot client
-intents = discord.Intents.default()
-intents.members = True
-intents.messages = True
-intents.guilds = True
-
+intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
 # Function to encode user ID in base64
@@ -35,10 +31,9 @@ async def gather_data(guild):
             "user_id": encode_user_id(str(member.id)),
             "name": member.name,
             "joined_at": member.joined_at.isoformat(),
-            "profile_picture": str(member.avatar_url),
             "banner": str(member.banner_url) if member.banner else None,
             "badges": [str(badge) for badge in member.public_flags],
-            "message_count": sum(1 for _ in await member.history(limit=None).flatten()),
+            "message_count": 0,  # Message count requires message content intent
             "bio": member.bio if hasattr(member, 'bio') else None,
             "discord_joined_at": member.created_at.isoformat()
         })
@@ -120,6 +115,14 @@ async def on_ready():
                     print(f"Error sending message to {channel.name}: {e}")
                 break
 
-# Run the bot with your token
-TOKEN = input('input bot token: ')
-client.run(TOKEN)
+# Get token from environment variable
+TOKEN = os.getenv('DISCORD_TOKEN')
+if not TOKEN:
+    TOKEN = input('Input bot token: ')
+
+try:
+    client.run(TOKEN)
+except discord.errors.LoginFailure:
+    print("Error: Invalid Discord token. Please check your token.")
+except Exception as e:
+    print(f"Error starting bot: {e}")
